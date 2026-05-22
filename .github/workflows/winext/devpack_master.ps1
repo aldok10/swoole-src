@@ -54,12 +54,14 @@ $dirname = ($sa.NameSpace($zipdest).Items() | Select-Object -Index 0).Name
 
 info "Done unzipping devpack, generate env.bat."
 
+$VCVer = $PhpVCVer.ToLower()
+
 $content="
 @ECHO OFF
 SET BUILD_DIR=$PhpArch\Release$underscorets
 SET PATH=$ToolsPath\$dirname;%PATH%
 SET DEVPACK_PATH=$ToolsPath\$dirname
-$ToolsPath\php-sdk-binary-tools\phpsdk-starter.bat -c $PhpVCVer -a $PhpArch -t %*
+$ToolsPath\php-sdk-binary-tools\phpsdk-starter.bat -c $VCVer -a $PhpArch -t %*
 "
 [IO.File]::WriteAllLines("$ToolsPath\env.bat", $content)
 

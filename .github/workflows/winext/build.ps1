@@ -81,13 +81,6 @@ if ("${env:FIX_PICKLE}" -Eq "1"){
 }
 
 info "Start nmake"
-info "Set verbose compiler/linker flags for diagnostics"
-# Enable multi-processor compilation, emit debug info and show warnings
-$env:CL = "/W3 /Zi /MP"
-# Ask the linker for verbose output
-$env:LINK = "/VERBOSE"
-Write-Host "CL=$env:CL"
-Write-Host "LINK=$env:LINK"
 nmake
 if (0 -Ne $lastexitcode){
     err "Failed nmake."

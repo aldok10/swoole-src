@@ -4,13 +4,14 @@ on: [push, pull_request]
 jobs:
   windows-tests:
     name: Unit Test on Windows
-    runs-on: windows-latest
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
-        os: [ 'windows-latest' ]
-        ts: [ 'ts', 'nts' ]
+        os: [ 'windows-2022' ]
         php: [ '8.2', '8.3', '8.4', '8.5' ]
+        arch: [ x64 ]
+        ts: [ ts ]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
