@@ -28,6 +28,7 @@ if (PHP_SWOOLE != "no") {
 	var PHP_THIRDPARTY_DIR = "thirdparty\\php" + PHP_VERSION_ID;
 
 	if (PHP_VERSION_ID >= 85) {
+		ADD_FLAG("CFLAGS", "/std:c++20");
 		ADD_FLAG("CXXFLAGS", "/std:c++20");
 	}
 
