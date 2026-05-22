@@ -57,10 +57,10 @@ info "Done unzipping devpack, generate env.bat."
 $vcBatch = "$ToolsPath\php-sdk-binary-tools\phpsdk-$($PhpVCVer.ToLower())-$PhpArch.bat"
 if (Test-Path $vcBatch) {
     info "Using specific phpsdk batch: $vcBatch"
-    $batchCommand = "\"$vcBatch\" -t %*"
+    $batchCommand = '"' + $vcBatch + '" -t %*'
 } else {
     info "Using phpsdk-starter.bat fallback"
-    $batchCommand = "\"$ToolsPath\php-sdk-binary-tools\phpsdk-starter.bat\" -c $VCVer -a $PhpArch -t %*"
+    $batchCommand = '"' + "$ToolsPath\php-sdk-binary-tools\phpsdk-starter.bat" + '" -c ' + $VCVer + ' -a ' + $PhpArch + ' -t %*'
 }
 
 $content="

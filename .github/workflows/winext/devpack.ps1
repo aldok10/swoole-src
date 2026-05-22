@@ -185,13 +185,13 @@ $vcBatch = "$ToolsPath\php-sdk-binary-tools\phpsdk-$PhpVCVer-$PhpArch.bat"
 $vcBatchLower = "$ToolsPath\php-sdk-binary-tools\phpsdk-$($PhpVCVer.ToLower())-$PhpArch.bat"
 if (Test-Path $vcBatch) {
     info "Using specific phpsdk batch: $vcBatch"
-    $batchCommand = "\"$vcBatch\" -t %*"
+    $batchCommand = '"' + $vcBatch + '" -t %*'
 } elseif (Test-Path $vcBatchLower) {
     info "Using specific phpsdk batch: $vcBatchLower"
-    $batchCommand = "\"$vcBatchLower\" -t %*"
+    $batchCommand = '"' + $vcBatchLower + '" -t %*'
 } else {
     info "Using phpsdk-starter.bat fallback"
-    $batchCommand = "\"$ToolsPath\php-sdk-binary-tools\phpsdk-starter.bat\" -c $PhpVCVer -a $PhpArch -t %*"
+    $batchCommand = '"' + "$ToolsPath\php-sdk-binary-tools\phpsdk-starter.bat" + '" -c ' + $PhpVCVer + ' -a ' + $PhpArch + ' -t %*'
 }
 
 $content="

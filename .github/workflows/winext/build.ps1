@@ -81,6 +81,8 @@ if ("${env:FIX_PICKLE}" -Eq "1"){
 }
 
 info "Start nmake"
+$env:CL = "/W3 /Zi /MP /std:c++20"
+Write-Host "CL=$env:CL"
 nmake
 if (0 -Ne $lastexitcode){
     err "Failed nmake."
