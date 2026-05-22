@@ -10,6 +10,7 @@ jobs:
       matrix:
         os: [ 'windows-latest' ]
         ts: [ 'ts' ]
+        php: [ '8.3', '8.4', '8.5' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -18,7 +19,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@master
         with:
-          php-version: '8.4'
+          php-version: ${{ matrix.php }}
           # ini-values: pcov.directory=lib
           # coverage: pcov
           coverage: none
@@ -33,10 +34,10 @@ jobs:
           path: |
             C:\tools\phpdev\deps
             C:\tools\phpdev\php-*-devel-*-*
-          key: php84-${{ runner.os }}-${{ matrix.ts }}-v2
+          key: php${{ matrix.php }}-${{ runner.os }}-${{ matrix.ts }}-v2
           restore-keys: |
-            php84-${{ runner.os }}-${{ matrix.ts }}-
-            php84-${{ runner.os }}-
+            php${{ matrix.php }}-${{ runner.os }}-${{ matrix.ts }}-
+            php${{ matrix.php }}-${{ runner.os }}-
 
       - name: Build Swoole extension
         uses: ./.github/workflows/winext
