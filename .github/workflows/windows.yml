@@ -9,23 +9,23 @@ jobs:
       fail-fast: false
       matrix:
         os: [ 'windows-latest' ]
-        ts: [ 'ts' ]
-        php: [ '8.3', '8.4', '8.5' ]
+        ts: [ 'ts', 'nts' ]
+        php: [ '8.2', '8.3', '8.4', '8.5' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Setup PHP
-        uses: shivammathur/setup-php@master
+        uses: shivammathur/setup-php@v2
+        env:
+          phpts: ${{ matrix.ts }}
         with:
           php-version: ${{ matrix.php }}
           # ini-values: pcov.directory=lib
           # coverage: pcov
           coverage: none
           extensions: curl,openssl,pdo
-        env:
-          phpts: ts
 
       - name: Cache PHP deps and devpack
         id: cache-php
@@ -47,6 +47,7 @@ jobs:
           conf-args: --enable-swoole-curl --enable-swoole-thread
           staging-deps: '1'
           deps: openssl,libcurl,libssh2,zlib,nghttp2,libzstd,brotli
+          phpts: ${{ matrix.ts == 'ts' && '1' || '0' }}
 
       - name: Get PHP runtime version and DLL path
         id: php_version
@@ -65,7 +66,7 @@ jobs:
       - name: Upload php_swoole.dll artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php_swoole-${{ steps.php_version.outputs.php_version }}-ts
+          name: php_swoole-${{ steps.php_version.outputs.php_version }}-${{ matrix.ts }}
           path: ${{ steps.php_version.outputs.dll_path }}
 
       - name: Show Swoole extension info
