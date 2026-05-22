@@ -47,6 +47,26 @@ jobs:
           staging-deps: '1'
           deps: openssl,libcurl,libssh2,zlib,nghttp2,libzstd,brotli
 
+      - name: Get PHP runtime version and DLL path
+        id: php_version
+        shell: powershell
+        run: |
+          $ver = php -r "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;"
+          Write-Output "php_version=$ver" | Out-File $env:GITHUB_OUTPUT -Append
+          $extdir = php -r "echo ini_get('extension_dir');"
+          Write-Output "php_extension_dir=$extdir" | Out-File $env:GITHUB_OUTPUT -Append
+          $dll = Join-Path $extdir "php_swoole.dll"
+          if (-Not (Test-Path $dll)) {
+            throw "Could not find php_swoole.dll in $extdir"
+          }
+          Write-Output "dll_path=$dll" | Out-File $env:GITHUB_OUTPUT -Append
+
+      - name: Upload php_swoole.dll artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php_swoole-${{ steps.php_version.outputs.php_version }}-ts
+          path: ${{ steps.php_version.outputs.dll_path }}
+
       - name: Show Swoole extension info
         shell: powershell
         run: |
