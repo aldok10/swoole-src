@@ -47,7 +47,7 @@ jobs:
           $tools = 'C:\tools\phpdev'
           Write-Host "ToolsPath: $tools"
           if (Test-Path $tools) {
-            Write-Host "Contents of $tools:"
+            Write-Host "Contents of ${tools}:"
             Get-ChildItem $tools -Force | ForEach-Object { Write-Host $_.FullName }
           } else {
             Write-Host "$tools not found"
