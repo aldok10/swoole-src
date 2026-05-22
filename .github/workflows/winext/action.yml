@@ -68,6 +68,21 @@ runs:
         )
         git --git-dir=${{ inputs.tools-path }}\php-sdk-binary-tools\.git --work-tree=${{ inputs.tools-path }}\php-sdk-binary-tools pull || EXIT /B 1
 
+    - name: Ensure VC folders exist
+      shell: powershell
+      run: |
+        $tools = "${{ inputs.tools-path }}"
+        $dirs = @('VS16','vs16','VS17','vs17','VC15','vc15')
+        foreach ($d in $dirs) {
+          $p = Join-Path $tools $d
+          if (-Not (Test-Path $p)) {
+            Write-Host "Creating missing VC folder: $p"
+            New-Item -Path $p -ItemType Directory | Out-Null
+          } else {
+            Write-Host "VC folder exists: $p"
+          }
+        }
+
     - name: Prepare PHP devel-pack and deps
       shell: powershell
       id: devpack-prepare

@@ -39,6 +39,36 @@ jobs:
             php${{ matrix.php }}-${{ runner.os }}-${{ matrix.ts }}-
             php${{ matrix.php }}-${{ runner.os }}-
 
+      - name: Debug PHP devpack environment
+        if: always()
+        shell: powershell
+        run: |
+          Write-Host "=== Devpack debug ==="
+          $tools = 'C:\tools\phpdev'
+          Write-Host "ToolsPath: $tools"
+          if (Test-Path $tools) {
+            Write-Host "Contents of $tools:"
+            Get-ChildItem $tools -Force | ForEach-Object { Write-Host $_.FullName }
+          } else {
+            Write-Host "$tools not found"
+          }
+          $envbat = Join-Path $tools 'env.bat'
+          if (Test-Path $envbat) {
+            Write-Host "\n--- env.bat content ---"
+            Get-Content $envbat | ForEach-Object { Write-Host $_ }
+            Write-Host "--- end env.bat ---\n"
+          } else {
+            Write-Host "env.bat not present at $envbat"
+          }
+          $deps = Join-Path $tools 'deps'
+          if (Test-Path $deps) {
+            Write-Host "Listing deps (top-level):"
+            Get-ChildItem $deps -Force | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
+          } else {
+            Write-Host "deps dir not present at $deps"
+          }
+          Write-Host "=== End Devpack debug ==="
+
       - name: Build Swoole extension
         uses: ./.github/workflows/winext
         with:
