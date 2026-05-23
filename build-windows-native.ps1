@@ -83,15 +83,32 @@ Write-Banner
 # ===== Step 1: Check prerequisites =====
 Write-Step "Checking prerequisites"
 
-# Check Visual Studio
+# Check Visual Studio for required versions
 $vsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-if (Test-Path $vsWhere) {
-    $vsPath = & $vsWhere -products * -latest -property installationPath
-    Write-Ok "Visual Studio found: $vsPath"
-}
-else {
-    Write-Err "Visual Studio not found. Install VS 2022 with C++ workload."
+if (-not (Test-Path $vsWhere)) {
+    Write-Err "vswhere.exe not found. Install Visual Studio with C++ workload."
     exit 1
+}
+
+$requiredVcVersions = $PhpVersions | ForEach-Object { $vcVersionMap[$_] } | Select-Object -Unique
+
+foreach ($vc in $requiredVcVersions) {
+    if ($vc -eq "vs16") {
+        $vsPath = & $vsWhere -version "[16.0,17.0)" -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if (-not $vsPath) {
+            Write-Err "Visual Studio 2019 (vs16) C++ workload not found. Required for PHP 8.2/8.3."
+            exit 1
+        }
+        Write-Ok "Visual Studio 2019 found: $vsPath"
+    }
+    elseif ($vc -eq "vs17") {
+        $vsPath = & $vsWhere -version "[17.0,18.0)" -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if (-not $vsPath) {
+            Write-Err "Visual Studio 2022 (vs17) C++ workload not found. Required for PHP 8.4/8.5."
+            exit 1
+        }
+        Write-Ok "Visual Studio 2022 found: $vsPath"
+    }
 }
 
 # Check Git
