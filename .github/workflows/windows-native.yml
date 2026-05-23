@@ -4,29 +4,72 @@ on: [push, pull_request]
 
 jobs:
   build-native:
-    name: Build Native PHP ${{ matrix.php-version }} on Windows
-    runs-on: ${{ matrix.os }}
+    name: Build Native PHP ${{ matrix.php-version }} (${{ matrix.vc-version }}) on Windows
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
         include:
+          # PHP 8.2 & 8.3 require vs16 (Visual Studio 2019 Build Tools)
           - php-version: '8.2'
-            os: windows-2019
+            vc-version: 'vs16'
           - php-version: '8.3'
-            os: windows-2019
+            vc-version: 'vs16'
+          # PHP 8.4 & 8.5 require vs17 (Visual Studio 2022 — pre-installed on windows-latest)
           - php-version: '8.4'
-            os: windows-latest
+            vc-version: 'vs17'
           - php-version: '8.5'
-            os: windows-latest
-    
+            vc-version: 'vs17'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
+      # Install VS 2019 Build Tools (vs16) when needed for PHP 8.2 / 8.3.
+      # windows-latest ships with VS 2022 (vs17) only, so we download the
+      # VS 2019 Build Tools bootstrapper and install the VC++ workload.
+      - name: Install Visual Studio 2019 Build Tools (vs16)
+        if: matrix.vc-version == 'vs16'
+        shell: powershell
+        run: |
+          Write-Host "Downloading VS 2019 Build Tools bootstrapper..."
+          $installer = "$env:TEMP\vs_buildtools_2019.exe"
+          Invoke-WebRequest `
+            -Uri "https://aka.ms/vs/16/release/vs_buildtools.exe" `
+            -OutFile $installer `
+            -UseBasicParsing
+
+          Write-Host "Installing VS 2019 Build Tools with VC++ workload..."
+          $process = Start-Process -FilePath $installer -ArgumentList @(
+            "--quiet",
+            "--wait",
+            "--norestart",
+            "--nocache",
+            "--add", "Microsoft.VisualStudio.Workload.VCTools",
+            "--includeRecommended"
+          ) -Wait -PassThru
+
+          if ($process.ExitCode -notin @(0, 3010)) {
+            Write-Error "VS 2019 Build Tools installation failed with exit code $($process.ExitCode)"
+            exit 1
+          }
+          Write-Host "VS 2019 Build Tools installed successfully (exit code $($process.ExitCode))"
+
+          # Verify vswhere can find vs16
+          $vsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs16Path = & $vsWhere -version "[16.0,17.0)" -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+          if (-not $vs16Path) {
+            Write-Error "vswhere could not locate VS 2019 after install"
+            exit 1
+          }
+          Write-Host "VS 2019 confirmed at: $vs16Path"
+
       - name: Run Native Build Script
         shell: powershell
-        run: .\build-windows-native.ps1 -PhpVersions @("${{ matrix.php-version }}")
-        
+        run: .\\build-windows-native.ps1 -PhpVersions @("${{ matrix.php-version }}")
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
