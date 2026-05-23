@@ -1,0 +1,26 @@
+name: Windows Native Build
+
+on: [push, pull_request]
+
+jobs:
+  build-native:
+    name: Build Native PHP ${{ matrix.php-version }} on Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3', '8.4', '8.5']
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Run Native Build Script
+        shell: powershell
+        run: .\build-windows-native.ps1 -PhpVersions @("${{ matrix.php-version }}")
+        
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: swoole-windows-dll-php${{ matrix.php-version }}
+          path: build-output/
