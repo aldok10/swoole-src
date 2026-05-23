@@ -207,7 +207,7 @@ bool SSLContext::create() {
     }
     context = SSL_CTX_new(method);
     if (context == nullptr) {
-#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80400
         ssl_error("%s", "SSL_CTX_new() failed");
 #else
         ssl_error("SSL_CTX_new() failed");
@@ -343,7 +343,7 @@ bool SSLContext::create() {
          * verify private key
          */
         if (!SSL_CTX_check_private_key(context)) {
-#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80400
             ssl_error("%s", "SSL_CTX_check_private_key() failed");
 #else
             ssl_error("SSL_CTX_check_private_key() failed");
@@ -416,7 +416,7 @@ bool SSLContext::set_capath() const {
         }
     } else {
         if (!SSL_CTX_set_default_verify_paths(context)) {
-#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80400
             ssl_error("%s", "SSL_CTX_set_default_verify_paths() failed");
 #else
             ssl_error("SSL_CTX_set_default_verify_paths() failed");
@@ -443,7 +443,7 @@ bool SSLContext::set_ciphers() const {
             return false;
         }
         if (prefer_server_ciphers && !SSL_CTX_set_options(context, SSL_OP_CIPHER_SERVER_PREFERENCE)) {
-#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80400
             ssl_error("%s", "SSL_CTX_set_options(SSL_OP_CIPHER_SERVER_PREFERENCE) failed");
 #else
             ssl_error("SSL_CTX_set_options(SSL_OP_CIPHER_SERVER_PREFERENCE) failed");
