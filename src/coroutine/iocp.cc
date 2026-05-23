@@ -25,6 +25,12 @@
 #ifdef realpath
 #undef realpath
 #endif
+#ifdef ENABLE_PHP_SWOOLE
+#include <main/php_version.h>
+#endif
+#if defined(PHP_VERSION_ID) && PHP_VERSION_ID >= 80500
+#include "zend_portability.h"
+#endif
 #include "win32/ioutil.h"
 
 using swoole::Coroutine;

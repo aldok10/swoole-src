@@ -396,11 +396,11 @@ static void php_swoole_init_globals(zend_swoole_globals *swoole_globals) {
 
 void php_swoole_register_shutdown_function(const char *function) {
 #if PHP_VERSION_ID >= 80500
-    php_shutdown_function_entry shutdown_function_entry = {
-        .fci_cache = empty_fcall_info_cache,
-        .params = NULL,
-        .param_count = 0,
-    };
+    php_shutdown_function_entry shutdown_function_entry;
+    memset(&shutdown_function_entry, 0, sizeof(shutdown_function_entry));
+    shutdown_function_entry.fci_cache = empty_fcall_info_cache;
+    shutdown_function_entry.params = NULL;
+    shutdown_function_entry.param_count = 0;
     auto fn_len = strlen(function);
     auto fn_entry = (zend_function *) zend_hash_str_find_ptr(EG(function_table), function, fn_len);
     assert(fn_entry);

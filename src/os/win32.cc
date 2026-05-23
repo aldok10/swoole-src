@@ -20,6 +20,10 @@
 #include <sstream>
 #include <algorithm>
 
+#ifdef ENABLE_PHP_SWOOLE
+#include <main/php_version.h>
+#endif
+
 using swoole::coroutine::System;
 
 // ============================================================================
@@ -150,7 +154,11 @@ int sw_gettimeofday(struct timeval *tv, struct timezone *tz) {
     }
 
     FILETIME ft;
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+    GetSystemTimeAsFileTime(&ft);
+#else
     GetSystemTimePreciseAsFileTime(&ft);
+#endif
 
     // Convert FILETIME (100-ns intervals since 1601-01-01) to Unix epoch
     ULARGE_INTEGER uli;

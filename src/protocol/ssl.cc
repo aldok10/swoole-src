@@ -27,6 +27,10 @@ using swoole::network::Socket;
 #error "OpenSSL 1.1.0 or later is required"
 #endif
 
+#ifdef ENABLE_PHP_SWOOLE
+#include <main/php_version.h>
+#endif
+
 static bool openssl_init = false;
 static int ssl_connection_index = 0;
 static int ssl_port_index = 0;
@@ -203,7 +207,11 @@ bool SSLContext::create() {
     }
     context = SSL_CTX_new(method);
     if (context == nullptr) {
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+        ssl_error("%s", "SSL_CTX_new() failed");
+#else
         ssl_error("SSL_CTX_new() failed");
+#endif
         return false;
     }
 
@@ -335,7 +343,11 @@ bool SSLContext::create() {
          * verify private key
          */
         if (!SSL_CTX_check_private_key(context)) {
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+            ssl_error("%s", "SSL_CTX_check_private_key() failed");
+#else
             ssl_error("SSL_CTX_check_private_key() failed");
+#endif
             return false;
         }
     }
@@ -404,7 +416,11 @@ bool SSLContext::set_capath() const {
         }
     } else {
         if (!SSL_CTX_set_default_verify_paths(context)) {
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+            ssl_error("%s", "SSL_CTX_set_default_verify_paths() failed");
+#else
             ssl_error("SSL_CTX_set_default_verify_paths() failed");
+#endif
             return false;
         }
     }
@@ -427,7 +443,11 @@ bool SSLContext::set_ciphers() const {
             return false;
         }
         if (prefer_server_ciphers && !SSL_CTX_set_options(context, SSL_OP_CIPHER_SERVER_PREFERENCE)) {
+#if defined(ENABLE_PHP_SWOOLE) && defined(PHP_VERSION_ID) && PHP_VERSION_ID < 80300
+            ssl_error("%s", "SSL_CTX_set_options(SSL_OP_CIPHER_SERVER_PREFERENCE) failed");
+#else
             ssl_error("SSL_CTX_set_options(SSL_OP_CIPHER_SERVER_PREFERENCE) failed");
+#endif
             return false;
         }
     }
@@ -616,10 +636,10 @@ static int swoole_ssl_verify_callback(int ok, X509_STORE_CTX *x509_store) {
 #define COOKIE_SECRET_LENGTH (32)
 
 static void calculate_cookie(SSL *ssl, uchar *cookie_secret, uint cookie_length) {
-    long rv = (long) ssl;
-    long inum = (cookie_length - (((long) cookie_secret) % sizeof(long))) / sizeof(long);
-    long i = 0;
-    long *ip = (long *) cookie_secret;
+    size_t rv = (size_t) ssl;
+    size_t inum = (cookie_length - (((size_t) cookie_secret) % sizeof(size_t))) / sizeof(size_t);
+    size_t i = 0;
+    size_t *ip = (size_t *) cookie_secret;
     for (i = 0; i < inum; ++i, ++ip) {
         *ip = rv;
     }
